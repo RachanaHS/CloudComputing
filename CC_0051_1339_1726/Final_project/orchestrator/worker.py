@@ -57,7 +57,7 @@ class User(Base):
 	def __init__(self, username, password):
 		self.username = username
 		self.password = password
-#Base.metadata.create_all(engine)
+
 
 class UserSchema(ma.Schema):
 	class Meta:
@@ -104,7 +104,7 @@ channel = connection.channel()
 
 
 
-#channel.queue_declare(queue='syncQ',durable=True)
+
 
 def callback(ch, method, properties, body):
 	Session=sessionmaker(bind=engine)
@@ -244,14 +244,6 @@ def sync(ch,method,props,body):
 				session.commit()
 
 
-	'''
-	print(" in sync now")
-	Session = sessionmaker(bind=engine)
-	session = Session()
-	data=json.loads(body)
-	u1 = User(data['user'],data['pw'])
-	session.add(u1)
-	session.commit()'''
 
 def on_request(ch,method,props,body):
 	Session = sessionmaker(bind=engine)
@@ -334,9 +326,7 @@ def on_request(ch,method,props,body):
 						response = rides_schema.dump(upcoming)
 						print("this is response")
 						print(response)
-			#response = {'data':res}
-			
-			#print(response)
+
 	
 	ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
@@ -350,34 +340,14 @@ logging.basicConfig()
 zk = KazooClient(hosts='zoo:2181')
 zk.start()
 
-#sed = os.uname()[1]
-#print(sed)
 
-#client2=docker.DockerClient(base_url='unix:///var/run/docker.sock')
-#client1=docker.APIClient(base_url='unix:///var/run/docker.sock')##
-#client2=docker.DockerClient(base_url='tcp://192.168.0.21:2375')
-# this = client2.containers.get(sed)
-
-#this=client.containers.get(sed)
 name1="master"
-#name2="hithere"
-#print(this.attrs["State"]["Pid"])
 
 zk.ensure_path("/master")
 zk.ensure_path("/slave")
 
-#def delete_zoo():
-#	global this
-#	pid=str((this.attrs)["State"]["Pid"])
-#	zk.delete("/slave/"+str(pid))
-#	time.sleep(1)
-#	this.stop()
 
-#atexit.register(delete_zoo)
 if(os.environ['WORKER'] == 'MASTER'):
-
-
-#	zk.create("/master/"+str((this.attrs)["State"]["Pid"]),this.id.encode,ephemeral=True)
 	zk.create("/master/"+name1,b"hello",ephemeral=True)
 	print("master znode")
 	channel.queue_declare(queue='writeQ', durable=True)
@@ -388,9 +358,6 @@ if(os.environ['WORKER'] == 'MASTER'):
 	
 
 elif(os.environ['WORKER'] == 'SLAVE'):
-
-	print("in slave")		
-	#print(this.attrs["State"]["Pid"])
 	zk.create("/slave/"+dbname,b"hey",ephemeral=True)
 	Session=sessionmaker(bind=engine)
 	session=Session()
