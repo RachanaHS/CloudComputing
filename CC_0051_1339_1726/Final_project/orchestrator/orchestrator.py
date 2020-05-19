@@ -31,16 +31,9 @@ logging.basicConfig()
 zk = KazooClient(hosts='zoo:2181')
 zk.start()
 
-#sed = os.uname()[1]
-print("hi")
-
 
 client=docker.DockerClient(base_url='unix:///var/run/docker.sock')
 client1=docker.APIClient(base_url='unix:///var/run/docker.sock')
-#client=docker.DockerClient(base_url='198.162.0.21:2375')
-#client1=docker.APIClient(base_url='198.162.0.21:2375')
-#this = client.containers.get(sed)
-
 
 
 app = Flask(__name__)
@@ -123,9 +116,6 @@ no_slaves=1
 
 
 def slave_watcher(event):
-    #duplicate database
-#	master = client.containers.get(zk.get("/master/"+zk.get_children("/master")[0])[0].decode())
-#	master.commit('worker:latest')
 	slave = client.containers.run(
 		privileged=True,
 		image = 'worker:latest',
